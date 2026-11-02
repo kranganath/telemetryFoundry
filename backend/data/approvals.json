@@ -1,0 +1,1019 @@
+{
+  "APR-2581F1B4": {
+    "id": "APR-2581F1B4",
+    "status": "approved",
+    "approved_at": "2026-10-31T22:40:40.094417+00:00",
+    "standard_id": "ocsf-iam",
+    "entity_id": "authentication",
+    "source": {
+      "name": "okta_system_log",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "event_type",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_email",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "client_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_agent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "outcome_result",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "service_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "mfa_factor",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": "CAST(event_time AS TIMESTAMP)",
+        "confidence": 0.95,
+        "rationale": "Primary timestamp of when authentication occurred."
+      },
+      {
+        "source": "event_type",
+        "target": "activity_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.75,
+        "rationale": "Source activity label maps to OCSF activity name."
+      },
+      {
+        "source": "user_uid",
+        "target": "user.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Unique user identifier for authenticated user."
+      },
+      {
+        "source": "user_email",
+        "target": "user.email_addr",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "User primary email address."
+      },
+      {
+        "source": "client_ip",
+        "target": "device.ip",
+        "transform": "cast",
+        "expression": "CAST(client_ip AS INET)",
+        "confidence": 0.9,
+        "rationale": "Client IP is authenticating device IP."
+      },
+      {
+        "source": "user_agent",
+        "target": "http_request.user_agent",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Browser/OS identifier from request header."
+      },
+      {
+        "source": "outcome_result",
+        "target": "",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.2,
+        "rationale": "No status/result field in provided Authentication targets."
+      },
+      {
+        "source": "service_name",
+        "target": "service.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Name of service being authenticated to."
+      },
+      {
+        "source": "session_uid",
+        "target": "session.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Unique identifier of auth session."
+      },
+      {
+        "source": "mfa_factor",
+        "target": "is_mfa",
+        "transform": "expression",
+        "expression": "CASE WHEN mfa_factor IS NOT NULL AND mfa_factor != '' THEN TRUE ELSE FALSE END",
+        "confidence": 0.7,
+        "rationale": "Presence of MFA factor indicates MFA was used."
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "3",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Source field 'outcome_result' is unmapped."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.035,
+      "required_total": 11,
+      "mapped_targets": [
+        "activity_id",
+        "activity_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "device.ip",
+        "http_request.user_agent",
+        "is_mfa",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "service.name",
+        "session.uid",
+        "severity_id",
+        "time",
+        "type_uid",
+        "user.email_addr",
+        "user.uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-C02DDA75": {
+    "id": "APR-C02DDA75",
+    "status": "approved",
+    "approved_at": "2026-11-01T02:07:14.795348+00:00",
+    "standard_id": "ocsf-iam",
+    "entity_id": "authentication",
+    "source": {
+      "name": "okta_system_log",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "event_type",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_email",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "client_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_agent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "outcome_result",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "service_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "mfa_factor",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Primary event timestamp maps to required Authentication time"
+      },
+      {
+        "source": "event_type",
+        "target": "activity_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.65,
+        "rationale": "Source event type describes logon/logoff activity"
+      },
+      {
+        "source": "user_uid",
+        "target": "user.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Unique user identifier direct match"
+      },
+      {
+        "source": "user_email",
+        "target": "user.email_addr",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "User email direct match"
+      },
+      {
+        "source": "client_ip",
+        "target": "device.ip",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.65,
+        "rationale": "Client IP is authenticating device IP, no src_endpoint in targets"
+      },
+      {
+        "source": "user_agent",
+        "target": "http_request.user_agent",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Browser/OS agent string direct match"
+      },
+      {
+        "source": "outcome_result",
+        "target": "",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.3,
+        "rationale": "No status/result target in provided Authentication subset"
+      },
+      {
+        "source": "service_name",
+        "target": "service.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Service name direct match"
+      },
+      {
+        "source": "session_uid",
+        "target": "session.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Session identifier direct match"
+      },
+      {
+        "source": "mfa_factor",
+        "target": "is_mfa",
+        "transform": "expression",
+        "expression": "CASE WHEN mfa_factor IS NOT NULL AND mfa_factor <> '' THEN TRUE ELSE FALSE END",
+        "confidence": 0.8,
+        "rationale": "Presence of MFA factor indicates MFA was used"
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "3",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Source field 'outcome_result' is unmapped."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.035,
+      "required_total": 11,
+      "mapped_targets": [
+        "activity_id",
+        "activity_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "device.ip",
+        "http_request.user_agent",
+        "is_mfa",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "service.name",
+        "session.uid",
+        "severity_id",
+        "time",
+        "type_uid",
+        "user.email_addr",
+        "user.uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-EAFFD5FD": {
+    "id": "APR-EAFFD5FD",
+    "status": "approved",
+    "approved_at": "2026-11-01T03:22:40.106123+00:00",
+    "standard_id": "ocsf-iam",
+    "entity_id": "authentication",
+    "source": {
+      "name": "okta_system_log",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "event_type",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_email",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "client_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_agent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "outcome_result",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "service_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "mfa_factor",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": "CAST(event_time AS TIMESTAMP)",
+        "confidence": 0.95,
+        "rationale": "Primary event timestamp maps to OCSF time"
+      },
+      {
+        "source": "event_type",
+        "target": "activity_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.75,
+        "rationale": "Source event type describes authentication activity"
+      },
+      {
+        "source": "user_uid",
+        "target": "user.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Unique user identifier"
+      },
+      {
+        "source": "user_email",
+        "target": "user.email_addr",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "User primary email address"
+      },
+      {
+        "source": "client_ip",
+        "target": "device.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.7,
+        "rationale": "Client IP is authenticating device IP"
+      },
+      {
+        "source": "user_agent",
+        "target": "http_request.user_agent",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Browser/OS identifier maps directly"
+      },
+      {
+        "source": "outcome_result",
+        "target": "",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.2,
+        "rationale": "No status/disposition target in provided schema"
+      },
+      {
+        "source": "service_name",
+        "target": "service.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Service name maps directly"
+      },
+      {
+        "source": "session_uid",
+        "target": "session.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Session unique identifier"
+      },
+      {
+        "source": "mfa_factor",
+        "target": "is_mfa",
+        "transform": "expression",
+        "expression": "CASE WHEN mfa_factor IS NOT NULL AND mfa_factor <> '' THEN TRUE ELSE FALSE END",
+        "confidence": 0.8,
+        "rationale": "Presence of MFA factor indicates MFA used"
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "3",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Source field 'outcome_result' is unmapped."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.035,
+      "required_total": 11,
+      "mapped_targets": [
+        "activity_id",
+        "activity_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "device.ip",
+        "http_request.user_agent",
+        "is_mfa",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "service.name",
+        "session.uid",
+        "severity_id",
+        "time",
+        "type_uid",
+        "user.email_addr",
+        "user.uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-46C44179": {
+    "id": "APR-46C44179",
+    "status": "approved",
+    "approved_at": "2026-11-02T04:10:22.540350+00:00",
+    "standard_id": "ocsf-application",
+    "entity_id": "api_activity",
+    "source": {
+      "name": "nginx_access_logs",
+      "fields": [
+        {
+          "name": "client_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "timestamp",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "http_method",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "request_uri",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "status_code",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "referrer",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_agent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "request_time",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "client_ip",
+        "target": "src_endpoint.ip",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Client IP is source endpoint of API/HTTP request."
+      },
+      {
+        "source": "timestamp",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Primary event time when activity occurred."
+      },
+      {
+        "source": "http_method",
+        "target": "http_request.http_method",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": "Exact name and semantic match for HTTP method."
+      },
+      {
+        "source": "request_uri",
+        "target": "api.operation",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.75,
+        "rationale": "URI path identifies API operation; required field."
+      },
+      {
+        "source": "status_code",
+        "target": "http_response.code",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "HTTP status code from server to client."
+      },
+      {
+        "source": "bytes_sent",
+        "target": "http_response.length",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.85,
+        "rationale": "Bytes sent equals HTTP response length in bytes."
+      },
+      {
+        "source": "referrer",
+        "target": "http_request.referrer",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": "Exact semantic match for referrer header."
+      },
+      {
+        "source": "user_agent",
+        "target": "http_request.user_agent",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": "Exact semantic match for user-agent header."
+      },
+      {
+        "source": "request_time",
+        "target": "http_response.latency",
+        "transform": "expression",
+        "expression": "CAST(request_time AS DOUBLE) * 1000",
+        "confidence": 0.7,
+        "rationale": "Request processing time maps to response latency in ms."
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "6003",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "6",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "6003",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "coverage": 1.0,
+      "breadth": 0.041,
+      "required_total": 12,
+      "mapped_targets": [
+        "activity_id",
+        "api.operation",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "http_request.http_method",
+        "http_request.referrer",
+        "http_request.user_agent",
+        "http_response.code",
+        "http_response.latency",
+        "http_response.length",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "time",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  }
+}

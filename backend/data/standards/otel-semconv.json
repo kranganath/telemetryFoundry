@@ -1,0 +1,403 @@
+{
+  "id": "otel-semconv",
+  "name": "OpenTelemetry Semantic Conventions",
+  "category": "security",
+  "version": "1.26.0",
+  "description": "OpenTelemetry semantic conventions snapshot (log records, resource, scope, spans). Curated from stable semconv; hydrate via MCP, then activate to map telemetry to OTel.",
+  "entities": [
+    {
+      "id": "log-record",
+      "name": "Log Record",
+      "fields": [
+        {
+          "path": "timestamp",
+          "type": "datetime",
+          "required": true,
+          "description": "Time when the event occurred"
+        },
+        {
+          "path": "observed_timestamp",
+          "type": "datetime",
+          "required": false,
+          "description": "Time when the event was observed by the collection system"
+        },
+        {
+          "path": "severity_number",
+          "type": "integer",
+          "required": false,
+          "description": "Numerical value of the severity"
+        },
+        {
+          "path": "severity_text",
+          "type": "string",
+          "required": false,
+          "description": "Original string representation of the severity"
+        },
+        {
+          "path": "body",
+          "type": "string",
+          "required": true,
+          "description": "The log body / message"
+        },
+        {
+          "path": "event.name",
+          "type": "string",
+          "required": false,
+          "description": "Name of the event (event.name)"
+        },
+        {
+          "path": "trace_id",
+          "type": "string",
+          "required": false,
+          "description": "Trace id of the correlated span"
+        },
+        {
+          "path": "span_id",
+          "type": "string",
+          "required": false,
+          "description": "Span id of the correlated span"
+        },
+        {
+          "path": "trace_flags",
+          "type": "integer",
+          "required": false,
+          "description": "W3C trace flags"
+        },
+        {
+          "path": "code.function",
+          "type": "string",
+          "required": false,
+          "description": "Function name where the log was emitted"
+        },
+        {
+          "path": "code.filepath",
+          "type": "string",
+          "required": false,
+          "description": "Source file where the log was emitted"
+        },
+        {
+          "path": "code.lineno",
+          "type": "integer",
+          "required": false,
+          "description": "Line number in the source file"
+        },
+        {
+          "path": "exception.type",
+          "type": "string",
+          "required": false,
+          "description": "Exception type / class name"
+        },
+        {
+          "path": "exception.message",
+          "type": "string",
+          "required": false,
+          "description": "Exception message"
+        },
+        {
+          "path": "exception.stacktrace",
+          "type": "text",
+          "required": false,
+          "description": "Exception stacktrace"
+        }
+      ],
+      "meta": {}
+    },
+    {
+      "id": "resource",
+      "name": "Resource",
+      "fields": [
+        {
+          "path": "service.name",
+          "type": "string",
+          "required": true,
+          "description": "Logical name of the service"
+        },
+        {
+          "path": "service.version",
+          "type": "string",
+          "required": false,
+          "description": "Version of the service"
+        },
+        {
+          "path": "service.namespace",
+          "type": "string",
+          "required": false,
+          "description": "Namespace of the service"
+        },
+        {
+          "path": "service.instance.id",
+          "type": "string",
+          "required": false,
+          "description": "Instance id of the service"
+        },
+        {
+          "path": "telemetry.sdk.name",
+          "type": "string",
+          "required": false,
+          "description": "Name of the telemetry SDK"
+        },
+        {
+          "path": "telemetry.sdk.version",
+          "type": "string",
+          "required": false,
+          "description": "Version of the telemetry SDK"
+        },
+        {
+          "path": "telemetry.sdk.language",
+          "type": "string",
+          "required": false,
+          "description": "Language of the telemetry SDK"
+        },
+        {
+          "path": "host.name",
+          "type": "string",
+          "required": false,
+          "description": "Hostname of the host"
+        },
+        {
+          "path": "host.id",
+          "type": "string",
+          "required": false,
+          "description": "Unique host id"
+        },
+        {
+          "path": "os.type",
+          "type": "string",
+          "required": false,
+          "description": "Operating system type"
+        },
+        {
+          "path": "os.version",
+          "type": "string",
+          "required": false,
+          "description": "Operating system version"
+        },
+        {
+          "path": "container.name",
+          "type": "string",
+          "required": false,
+          "description": "Container name"
+        },
+        {
+          "path": "container.id",
+          "type": "string",
+          "required": false,
+          "description": "Container id"
+        },
+        {
+          "path": "k8s.cluster.name",
+          "type": "string",
+          "required": false,
+          "description": "Kubernetes cluster name"
+        },
+        {
+          "path": "k8s.namespace.name",
+          "type": "string",
+          "required": false,
+          "description": "Kubernetes namespace name"
+        },
+        {
+          "path": "k8s.pod.name",
+          "type": "string",
+          "required": false,
+          "description": "Kubernetes pod name"
+        },
+        {
+          "path": "cloud.provider",
+          "type": "string",
+          "required": false,
+          "description": "Cloud provider name"
+        },
+        {
+          "path": "cloud.account.id",
+          "type": "string",
+          "required": false,
+          "description": "Cloud account id"
+        },
+        {
+          "path": "cloud.region",
+          "type": "string",
+          "required": false,
+          "description": "Cloud region"
+        },
+        {
+          "path": "process.pid",
+          "type": "integer",
+          "required": false,
+          "description": "Process identifier"
+        },
+        {
+          "path": "process.executable.path",
+          "type": "string",
+          "required": false,
+          "description": "Path to the process executable"
+        }
+      ],
+      "meta": {}
+    },
+    {
+      "id": "scope",
+      "name": "Scope",
+      "fields": [
+        {
+          "path": "scope.name",
+          "type": "string",
+          "required": true,
+          "description": "Name of the instrumentation scope (library / meter)"
+        },
+        {
+          "path": "scope.version",
+          "type": "string",
+          "required": false,
+          "description": "Version of the instrumentation scope"
+        }
+      ],
+      "meta": {}
+    },
+    {
+      "id": "span",
+      "name": "Span",
+      "fields": [
+        {
+          "path": "trace_id",
+          "type": "string",
+          "required": true,
+          "description": "Trace identifier shared by all spans in a trace"
+        },
+        {
+          "path": "span_id",
+          "type": "string",
+          "required": true,
+          "description": "Span identifier"
+        },
+        {
+          "path": "parent_span_id",
+          "type": "string",
+          "required": false,
+          "description": "Parent span identifier"
+        },
+        {
+          "path": "name",
+          "type": "string",
+          "required": true,
+          "description": "Span operation name"
+        },
+        {
+          "path": "kind",
+          "type": "string",
+          "required": false,
+          "description": "Span kind (internal, server, client, producer, consumer)"
+        },
+        {
+          "path": "start_time",
+          "type": "datetime",
+          "required": false,
+          "description": "Span start time"
+        },
+        {
+          "path": "end_time",
+          "type": "datetime",
+          "required": false,
+          "description": "Span end time"
+        },
+        {
+          "path": "status.code",
+          "type": "string",
+          "required": false,
+          "description": "Span status code (unset, ok, error)"
+        },
+        {
+          "path": "status.message",
+          "type": "string",
+          "required": false,
+          "description": "Span status message"
+        },
+        {
+          "path": "http.request.method",
+          "type": "string",
+          "required": false,
+          "description": "HTTP request method"
+        },
+        {
+          "path": "url.full",
+          "type": "string",
+          "required": false,
+          "description": "Full HTTP request URL"
+        },
+        {
+          "path": "url.path",
+          "type": "string",
+          "required": false,
+          "description": "HTTP request path"
+        },
+        {
+          "path": "http.route",
+          "type": "string",
+          "required": false,
+          "description": "HTTP route template"
+        },
+        {
+          "path": "http.response.status_code",
+          "type": "integer",
+          "required": false,
+          "description": "HTTP response status code"
+        },
+        {
+          "path": "db.system",
+          "type": "string",
+          "required": false,
+          "description": "Database system identifier"
+        },
+        {
+          "path": "db.name",
+          "type": "string",
+          "required": false,
+          "description": "Database name"
+        },
+        {
+          "path": "db.statement",
+          "type": "text",
+          "required": false,
+          "description": "Database statement / query text"
+        },
+        {
+          "path": "db.operation",
+          "type": "string",
+          "required": false,
+          "description": "Database operation name"
+        },
+        {
+          "path": "messaging.system",
+          "type": "string",
+          "required": false,
+          "description": "Messaging system identifier"
+        },
+        {
+          "path": "messaging.operation",
+          "type": "string",
+          "required": false,
+          "description": "Messaging operation name"
+        },
+        {
+          "path": "rpc.system",
+          "type": "string",
+          "required": false,
+          "description": "RPC system identifier"
+        },
+        {
+          "path": "rpc.service",
+          "type": "string",
+          "required": false,
+          "description": "RPC service name"
+        },
+        {
+          "path": "rpc.method",
+          "type": "string",
+          "required": false,
+          "description": "RPC method name"
+        }
+      ],
+      "meta": {}
+    }
+  ]
+}
