@@ -13,8 +13,19 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from .llm import chat_json, last_error, llm_enabled, model_name
+from .llm import (chat_json, last_content, last_error, last_finish_reason,
+                   llm_enabled, model_name)
 from .models import MappingEntry
+
+#: Token budget for the three-file artifacts call. Three complete files in
+#: one JSON object need headroom; chat_json() retries once higher still on
+#: truncation before the export falls back to templates.
+EXPORT_MAX_TOKENS = 12000
+
+#: Read timeout for the artifacts call. A 12k-token generation legitimately
+#: takes longer than the 60s META_TIMEOUT_SECONDS default; other calls keep
+#: the default so real hangs still fail fast.
+EXPORT_TIMEOUT_SECONDS = 180
 
 
 def _slug(text: str) -> str:
@@ -201,10 +212,11 @@ def template_bundle(job: dict) -> str:
 
 
 _EXPORT_SYSTEM = (
-    "You generate Databricks-ready ETL artifacts. Return a JSON object with "
-    "keys transform_py, transform_sql, dq_tests_py, each a string of complete "
-    "file content. Use the provided source table, target table, and column "
-    "mappings (SQL expressions with aliases). Keep code runnable on Databricks."
+    "You generate Databricks-ready ETL artifacts. Return ONLY a JSON object "
+    "with keys transform_py, transform_sql, dq_tests_py, each a string of "
+    "complete file content with newlines escaped as \\n. Use the provided "
+    "source table, target table, and column mappings (SQL expressions with "
+    "aliases). Keep code runnable on Databricks. No markdown, no commentary."
 )
 
 
@@ -222,14 +234,45 @@ def llm_artifacts(job: dict) -> Optional[dict[str, str]]:
         ],
         "required_columns": job["required_cols"],
     }, default=str)
-    data = chat_json(_EXPORT_SYSTEM, user, max_tokens=6000)
-    if not data or "transform_py" not in data:
+    data = chat_json(_EXPORT_SYSTEM, user, max_tokens=EXPORT_MAX_TOKENS,
+                      timeout_seconds=EXPORT_TIMEOUT_SECONDS)
+    if data and "transform_py" in data:
+        return {
+            "transform_py": data.get("transform_py", ""),
+            "transform_sql": data.get("transform_sql", ""),
+            "dq_tests_py": data.get("dq_tests_py", ""),
+        }
+    # The model sometimes answers with fenced code blocks instead of JSON.
+    # Salvage those only when the response was complete: truncated output
+    # must fall back to templates, never to half a file.
+    if (last_finish_reason() or "").lower() not in ("length", "max_tokens"):
+        salvaged = _salvage_fenced_blocks(last_content() or "")
+        if salvaged:
+            return salvaged
+    return None
+
+
+def _salvage_fenced_blocks(content: str) -> Optional[dict[str, str]]:
+    """Extract the three artifacts from ``` fenced blocks, if present."""
+    blocks = re.findall(r"```(\w*)\s*\n(.*?)```", content, re.DOTALL)
+    bodies = [body.strip() for _, body in blocks if body.strip()]
+    if len(bodies) < 3:
         return None
-    return {
-        "transform_py": data.get("transform_py", ""),
-        "transform_sql": data.get("transform_sql", ""),
-        "dq_tests_py": data.get("dq_tests_py", ""),
-    }
+    langs = [(lang or "").lower() for lang, body in blocks if body.strip()]
+    sql_idx = next((i for i, lang in enumerate(langs)
+                    if lang == "sql"), None)
+    if sql_idx is None:
+        transform_py, transform_sql, dq_tests_py = bodies[0], bodies[1], bodies[2]
+    else:
+        others = [b for i, b in enumerate(bodies) if i != sql_idx]
+        if len(others) < 2:
+            return None
+        transform_py, transform_sql, dq_tests_py = (
+            others[0], bodies[sql_idx], others[1])
+    if min(len(transform_py), len(transform_sql), len(dq_tests_py)) < 50:
+        return None
+    return {"transform_py": transform_py, "transform_sql": transform_sql,
+            "dq_tests_py": dq_tests_py}
 
 
 def _llm_files_honor_target(llm_files: dict[str, str], job: dict) -> bool:
@@ -274,7 +317,7 @@ def export_artifacts(
                          "used template instead.")
             llm_files = None
         else:
-            llm_error = last_error()
+            llm_error = last_error() or "LLM returned no usable artifacts"
     files = [
         {"path": "transform.py",
          "content": (llm_files or {}).get("transform_py") or template_pyspark(job)},

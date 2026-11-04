@@ -804,3 +804,158 @@ def test_agent_refine_llm_path(monkeypatch):
     assert body["rounds"] == 2
     critic_steps = [s for s in body["trace"] if s["agent"] == "critic"]
     assert critic_steps and critic_steps[0]["detail"].startswith("meta")
+
+
+def test_chat_json_retries_truncated_response(monkeypatch):
+    import httpx
+    import app.llm as llm
+
+    _enable_llm(monkeypatch)
+    seen_budgets = []
+    calls = {"n": 0}
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, url, json=None, headers=None):
+            calls["n"] += 1
+            seen_budgets.append((json or {}).get("max_tokens"))
+            req = httpx.Request("POST", url)
+            if calls["n"] == 1:
+                return httpx.Response(200, request=req, json={
+                    "choices": [{
+                        "message": {"content":
+                                    '{"mappings": [{"source": "a", "target": "unterminated'},
+                        "finish_reason": "length"}]})
+            return httpx.Response(200, request=req, json={
+                "choices": [{"message": {"content": '{"mappings": []}'},
+                             "finish_reason": "stop"}]})
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+    assert llm.chat_json("s", "u") == {"mappings": []}
+    assert len(seen_budgets) == 2
+    assert seen_budgets[1] > seen_budgets[0]
+
+
+def test_chat_json_truncation_error_is_actionable(monkeypatch):
+    import httpx
+    import app.llm as llm
+
+    _enable_llm(monkeypatch)
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, url, json=None, headers=None):
+            req = httpx.Request("POST", url)
+            return httpx.Response(200, request=req, json={
+                "choices": [{
+                    "message": {"content":
+                                '{"transform_py": "x = 1  # unterminated'},
+                    "finish_reason": "length"}]})
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+    assert llm.chat_json("s", "u") is None
+    err = llm.last_error() or ""
+    assert "truncat" in err
+    assert "max_tokens" in err
+
+
+def test_chat_json_accepts_literal_newlines(monkeypatch):
+    import app.llm as llm
+
+    monkeypatch.setattr(
+        llm, "chat", lambda *a, **k: '{"a": "line1\nline2"}')
+    assert llm.chat_json("s", "u") == {"a": "line1\nline2"}
+
+
+def test_export_llm_budget_and_fallback_error(monkeypatch):
+    import app.exporter as exporter
+
+    seen = {}
+
+    def fake_chat_json(system, user, max_tokens=4000, timeout_seconds=None):
+        seen["max_tokens"] = max_tokens
+        seen["timeout_seconds"] = timeout_seconds
+        return None
+
+    monkeypatch.setattr(exporter, "llm_enabled", lambda: True)
+    monkeypatch.setattr(exporter, "chat_json", fake_chat_json)
+    monkeypatch.setattr(exporter, "last_error", lambda: None)
+    monkeypatch.setattr(exporter, "last_content", lambda: None,
+                        raising=False)
+    result = exporter.export_artifacts([], [], "main", "curated", "t", "src")
+    assert seen["max_tokens"] >= 8000
+    assert (seen["timeout_seconds"] or 0) >= 120
+    assert result["generated_by"] == "template"
+    assert result["llm_error"]
+
+
+def test_chat_honors_timeout_override(monkeypatch):
+    import httpx
+    import app.llm as llm
+
+    _enable_llm(monkeypatch)
+    seen = {}
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            seen["timeout"] = k.get("timeout")
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, url, json=None, headers=None):
+            req = httpx.Request("POST", url)
+            return httpx.Response(200, request=req, json={
+                "choices": [{"message": {"content": "ok"},
+                             "finish_reason": "stop"}]})
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+    assert llm.chat([{"role": "user", "content": "hi"}],
+                    timeout_seconds=180) == "ok"
+    assert seen["timeout"].read == 180
+
+
+def test_chat_timeout_override_message_omits_env_hint(monkeypatch):
+    import httpx
+    import app.llm as llm
+
+    _enable_llm(monkeypatch)
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, *a, **k):
+            raise httpx.ReadTimeout("slow")
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+    assert llm.chat([{"role": "user", "content": "hi"}],
+                    timeout_seconds=180) is None
+    err = llm.last_error() or ""
+    assert "no response after 180s" in err
+    assert "META_TIMEOUT_SECONDS" not in err
