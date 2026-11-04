@@ -773,57 +773,62 @@
     },
     "registry_fingerprint": "c8c8acc6eb9cf01b"
   },
-  "APR-46C44179": {
-    "id": "APR-46C44179",
+  "APR-23727553": {
+    "id": "APR-23727553",
     "status": "approved",
-    "approved_at": "2026-11-02T04:10:22.540350+00:00",
-    "standard_id": "ocsf-application",
-    "entity_id": "api_activity",
+    "approved_at": "2026-11-03T03:05:47.002444+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
     "source": {
-      "name": "nginx_access_logs",
+      "name": "firewall_logs",
       "fields": [
         {
-          "name": "client_ip",
+          "name": "event_time",
           "type": "string",
           "sample": null
         },
         {
-          "name": "timestamp",
+          "name": "src_ip",
           "type": "string",
           "sample": null
         },
         {
-          "name": "http_method",
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
           "type": "string",
           "sample": null
         },
         {
-          "name": "request_uri",
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
           "type": "string",
           "sample": null
         },
         {
-          "name": "status_code",
+          "name": "action",
           "type": "string",
           "sample": null
         },
         {
           "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
           "type": "string",
           "sample": null
         },
         {
-          "name": "referrer",
-          "type": "string",
-          "sample": null
-        },
-        {
-          "name": "user_agent",
-          "type": "string",
-          "sample": null
-        },
-        {
-          "name": "request_time",
+          "name": "rule_name",
           "type": "string",
           "sample": null
         }
@@ -831,82 +836,353 @@
     },
     "mappings": [
       {
-        "source": "client_ip",
-        "target": "src_endpoint.ip",
-        "transform": "cast",
-        "expression": null,
-        "confidence": 0.9,
-        "rationale": "Client IP is source endpoint of API/HTTP request."
-      },
-      {
-        "source": "timestamp",
+        "source": "event_time",
         "target": "time",
         "transform": "cast",
         "expression": null,
         "confidence": 0.95,
-        "rationale": "Primary event time when activity occurred."
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
       },
       {
-        "source": "http_method",
-        "target": "http_request.http_method",
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
         "transform": "direct",
         "expression": null,
-        "confidence": 1.0,
-        "rationale": "Exact name and semantic match for HTTP method."
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
       },
       {
-        "source": "request_uri",
-        "target": "api.operation",
+        "source": "src_port",
+        "target": "src_endpoint.port",
         "transform": "direct",
         "expression": null,
-        "confidence": 0.75,
-        "rationale": "URI path identifies API operation; required field."
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
       },
       {
-        "source": "status_code",
-        "target": "http_response.code",
-        "transform": "cast",
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
         "expression": null,
-        "confidence": 0.9,
-        "rationale": "HTTP status code from server to client."
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
       },
       {
         "source": "bytes_sent",
-        "target": "http_response.length",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-C46747C0": {
+    "id": "APR-C46747C0",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:05:47.388563+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
         "transform": "cast",
         "expression": null,
-        "confidence": 0.85,
-        "rationale": "Bytes sent equals HTTP response length in bytes."
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
       },
       {
-        "source": "referrer",
-        "target": "http_request.referrer",
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
         "transform": "direct",
         "expression": null,
-        "confidence": 1.0,
-        "rationale": "Exact semantic match for referrer header."
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
       },
       {
-        "source": "user_agent",
-        "target": "http_request.user_agent",
+        "source": "src_port",
+        "target": "src_endpoint.port",
         "transform": "direct",
         "expression": null,
-        "confidence": 1.0,
-        "rationale": "Exact semantic match for user-agent header."
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
       },
       {
-        "source": "request_time",
-        "target": "http_response.latency",
-        "transform": "expression",
-        "expression": "CAST(request_time AS DOUBLE) * 1000",
-        "confidence": 0.7,
-        "rationale": "Request processing time maps to response latency in ms."
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
       },
       {
         "source": "",
         "target": "class_uid",
         "transform": "constant",
-        "expression": "6003",
+        "expression": "4001",
         "confidence": 0.3,
         "rationale": "Auto-fill default - review before approval (OCSF class UID)"
       },
@@ -930,7 +1206,7 @@
         "source": "",
         "target": "category_uid",
         "transform": "constant",
-        "expression": "6",
+        "expression": "4",
         "confidence": 0.3,
         "rationale": "Auto-fill default - review before approval (OCSF category UID)"
       },
@@ -938,7 +1214,5000 @@
         "source": "",
         "target": "type_uid",
         "transform": "constant",
-        "expression": "6003",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-C079FC35": {
+    "id": "APR-C079FC35",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:05:47.606427+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-D2C4BCD2": {
+    "id": "APR-D2C4BCD2",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:05:47.740405+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-438142EF": {
+    "id": "APR-438142EF",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:05:48.191254+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-C740EA19": {
+    "id": "APR-C740EA19",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:05:48.489306+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-F9C285FF": {
+    "id": "APR-F9C285FF",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:05:48.700277+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-B0D611CA": {
+    "id": "APR-B0D611CA",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:05:48.813136+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-2A3D7770": {
+    "id": "APR-2A3D7770",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:11:13.950203+00:00",
+    "standard_id": "ocsf-iam",
+    "entity_id": "authentication",
+    "source": {
+      "name": "okta_system_log",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "event_type",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_email",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "client_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "user_agent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "outcome_result",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "service_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_uid",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "mfa_factor",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": "CAST(event_time AS TIMESTAMP)",
+        "confidence": 0.95,
+        "rationale": "Primary event timestamp maps to OCSF required time"
+      },
+      {
+        "source": "event_type",
+        "target": "activity_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.7,
+        "rationale": "Event type indicates authentication activity like Logon/Logoff"
+      },
+      {
+        "source": "user_uid",
+        "target": "user.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Unique user identifier matches user.uid definition"
+      },
+      {
+        "source": "user_email",
+        "target": "user.email_addr",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Exact semantic match for user email address"
+      },
+      {
+        "source": "client_ip",
+        "target": "device.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Client IP is IP of authenticating device"
+      },
+      {
+        "source": "user_agent",
+        "target": "http_request.user_agent",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Exact match for browser/OS user agent header"
+      },
+      {
+        "source": "outcome_result",
+        "target": "",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.15,
+        "rationale": "No status/result field in target list"
+      },
+      {
+        "source": "service_name",
+        "target": "service.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Exact match for service name"
+      },
+      {
+        "source": "session_uid",
+        "target": "session.uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Exact match for session unique identifier"
+      },
+      {
+        "source": "mfa_factor",
+        "target": "is_mfa",
+        "transform": "expression",
+        "expression": "CASE WHEN mfa_factor IS NOT NULL AND mfa_factor <> '' THEN TRUE ELSE FALSE END",
+        "confidence": 0.8,
+        "rationale": "Presence of MFA factor indicates MFA was used"
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "3",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "3002",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Source field 'outcome_result' is unmapped."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.035,
+      "required_total": 11,
+      "mapped_targets": [
+        "activity_id",
+        "activity_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "device.ip",
+        "http_request.user_agent",
+        "is_mfa",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "service.name",
+        "session.uid",
+        "severity_id",
+        "time",
+        "type_uid",
+        "user.email_addr",
+        "user.uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-037192DD": {
+    "id": "APR-037192DD",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:24:25.001826+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "pan_traffic_logs",
+      "fields": [
+        {
+          "name": "receive_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "connection_protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "app",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_key",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "receive_time",
+        "target": "metadata.logged_time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.85,
+        "rationale": "Receive time is pipeline log time, not activity time."
+      },
+      {
+        "source": "src_zone",
+        "target": "src_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Source zone maps to source endpoint zone."
+      },
+      {
+        "source": "dst_zone",
+        "target": "dst_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Destination zone maps to dest endpoint zone."
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.98,
+        "rationale": "Source IP to src endpoint IP."
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.98,
+        "rationale": "Destination IP to dst endpoint IP."
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.98,
+        "rationale": "String port to integer src port."
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.98,
+        "rationale": "String port to integer dst port."
+      },
+      {
+        "source": "connection_protocol",
+        "target": "connection_info.protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Protocol string e.g. tcp/udp to IANA name."
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Firewall action caption maps to action."
+      },
+      {
+        "source": "app",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "App identifier to network app name."
+      },
+      {
+        "source": "rule",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.85,
+        "rationale": "Rule name that generated event."
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes_out",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Bytes from source to dest is bytes_out."
+      },
+      {
+        "source": "bytes_received",
+        "target": "traffic.bytes_in",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Bytes from dest to source is bytes_in."
+      },
+      {
+        "source": "packets_sent",
+        "target": "traffic.packets_out",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Packets source to dest is packets_out."
+      },
+      {
+        "source": "packets_received",
+        "target": "traffic.packets_in",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Packets dest to source is packets_in."
+      },
+      {
+        "source": "session_key",
+        "target": "",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.3,
+        "rationale": "No session UID string target; session objects require struct."
+      },
+      {
+        "source": "start_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.9,
+        "rationale": "Session start is primary event time."
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "4",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner-1",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Source field 'session_key' is unmapped."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.041,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "connection_info.protocol_name",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "dst_endpoint.zone",
+        "firewall_rule.name",
+        "metadata.logged_time",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "src_endpoint.zone",
+        "time",
+        "traffic.bytes_in",
+        "traffic.bytes_out",
+        "traffic.packets_in",
+        "traffic.packets_out",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-129F5F0B": {
+    "id": "APR-129F5F0B",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:25.219827+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-73E52171": {
+    "id": "APR-73E52171",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:25.626735+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "4",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-94C56E04": {
+    "id": "APR-94C56E04",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:25.852276+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-501B041C": {
+    "id": "APR-501B041C",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:25.986467+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-DBCCFE22": {
+    "id": "APR-DBCCFE22",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:26.453445+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-4FE918BB": {
+    "id": "APR-4FE918BB",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:26.756287+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-46F0F560": {
+    "id": "APR-46F0F560",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:26.968971+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-E4DA683B": {
+    "id": "APR-E4DA683B",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:27:27.083999+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "firewall_logs",
+      "fields": [
+        {
+          "name": "event_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "integer",
+          "sample": null
+        },
+        {
+          "name": "app_name",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule_name",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "event_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "protocol",
+        "target": "app_protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_protocol_name' (The application-layer (Layer 7) protocol name identified by )"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "app_name",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule_name",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "event_time",
+        "target": "class_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_ip",
+        "target": "metadata.product",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "src_port",
+        "target": "metadata.version",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_ip",
+        "target": "category_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "dst_port",
+        "target": "type_uid",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "protocol",
+        "target": "activity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "action",
+        "target": "severity_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "bytes_sent",
+        "target": "osint.type_id",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "app_name",
+        "target": "osint.value",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      },
+      {
+        "source": "rule_name",
+        "target": "cloud.provider",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 1.0,
+        "rationale": null
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": null,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "Possible type mismatch: 'event_time' (string) -> 'class_uid' (integer).",
+        "Possible type mismatch: 'src_port' (integer) -> 'metadata.version' (string).",
+        "Possible type mismatch: 'dst_ip' (string) -> 'category_uid' (integer).",
+        "Possible type mismatch: 'protocol' (string) -> 'activity_id' (integer).",
+        "Possible type mismatch: 'action' (string) -> 'severity_id' (integer)."
+      ],
+      "coverage": 1.0,
+      "breadth": 0.032,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "app_name",
+        "app_protocol_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "time",
+        "traffic.bytes",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-91F8AC6A": {
+    "id": "APR-91F8AC6A",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:32:02.050199+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "pan_traffic_logs",
+      "fields": [
+        {
+          "name": "receive_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "connection_protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "app",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_key",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "receive_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_zone",
+        "target": "src_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.zone' (The network zone or LAN segment.)"
+      },
+      {
+        "source": "dst_zone",
+        "target": "dst_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.zone' (The network zone or LAN segment.)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "connection_protocol",
+        "target": "connection_info.protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'connection_info.protocol_name' (The IP protocol name in lowercase, as defined by the Interne)"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "app",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "bytes_received",
+        "target": "cumulative_traffic.bytes",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'cumulative_traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "packets_sent",
+        "target": "traffic.packets",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.packets' (The total number of packets transferred in both directions ()"
+      },
+      {
+        "source": "packets_received",
+        "target": "cumulative_traffic.packets",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'cumulative_traffic.packets' (The total number of packets transferred in both directions ()"
+      },
+      {
+        "source": "session_key",
+        "target": "actor.session",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'actor.session' (The user session from which the activity was initiated.)"
+      },
+      {
+        "source": "start_time",
+        "target": "start_time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'start_time' (The time of the earliest event in an aggregate ( count > 1).)"
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "4",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner-1",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "coverage": 1.0,
+      "breadth": 0.043,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "actor.session",
+        "app_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "connection_info.protocol_name",
+        "cumulative_traffic.bytes",
+        "cumulative_traffic.packets",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "dst_endpoint.zone",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "src_endpoint.zone",
+        "start_time",
+        "time",
+        "traffic.bytes",
+        "traffic.packets",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-53DFEF12": {
+    "id": "APR-53DFEF12",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:34:53.429761+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "pan_traffic_logs",
+      "fields": [
+        {
+          "name": "receive_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "connection_protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "app",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_key",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "receive_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_zone",
+        "target": "src_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.zone' (The network zone or LAN segment.)"
+      },
+      {
+        "source": "dst_zone",
+        "target": "dst_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.zone' (The network zone or LAN segment.)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "connection_protocol",
+        "target": "connection_info.protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'connection_info.protocol_name' (The IP protocol name in lowercase, as defined by the Interne)"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "app",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "bytes_received",
+        "target": "cumulative_traffic.bytes",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'cumulative_traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "packets_sent",
+        "target": "traffic.packets",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.packets' (The total number of packets transferred in both directions ()"
+      },
+      {
+        "source": "packets_received",
+        "target": "cumulative_traffic.packets",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'cumulative_traffic.packets' (The total number of packets transferred in both directions ()"
+      },
+      {
+        "source": "session_key",
+        "target": "actor.session",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'actor.session' (The user session from which the activity was initiated.)"
+      },
+      {
+        "source": "start_time",
+        "target": "start_time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'start_time' (The time of the earliest event in an aggregate ( count > 1).)"
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "4",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "4001",
         "confidence": 0.3,
         "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
       },
@@ -990,27 +6259,390 @@
       "errors": [],
       "warnings": [],
       "coverage": 1.0,
-      "breadth": 0.041,
-      "required_total": 12,
+      "breadth": 0.043,
+      "required_total": 11,
       "mapped_targets": [
+        "action",
         "activity_id",
-        "api.operation",
+        "actor.session",
+        "app_name",
         "category_uid",
         "class_uid",
         "cloud.provider",
-        "http_request.http_method",
-        "http_request.referrer",
-        "http_request.user_agent",
-        "http_response.code",
-        "http_response.latency",
-        "http_response.length",
+        "connection_info.protocol_name",
+        "cumulative_traffic.bytes",
+        "cumulative_traffic.packets",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "dst_endpoint.zone",
+        "firewall_rule.name",
         "metadata.product",
         "metadata.version",
         "osint.type_id",
         "osint.value",
         "severity_id",
         "src_endpoint.ip",
+        "src_endpoint.port",
+        "src_endpoint.zone",
+        "start_time",
         "time",
+        "traffic.bytes",
+        "traffic.packets",
+        "type_uid"
+      ]
+    },
+    "registry_fingerprint": "c8c8acc6eb9cf01b"
+  },
+  "APR-083FF704": {
+    "id": "APR-083FF704",
+    "status": "approved",
+    "approved_at": "2026-11-03T03:47:57.182096+00:00",
+    "standard_id": "ocsf-network",
+    "entity_id": "network_activity",
+    "source": {
+      "name": "pan_traffic_logs",
+      "fields": [
+        {
+          "name": "receive_time",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_zone",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_ip",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "src_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "dst_port",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "connection_protocol",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "app",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "rule",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "bytes_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_sent",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "packets_received",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "session_key",
+          "type": "string",
+          "sample": null
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "sample": null
+        }
+      ]
+    },
+    "mappings": [
+      {
+        "source": "receive_time",
+        "target": "time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'time' (The primary timestamp of the event - when the activity actua)"
+      },
+      {
+        "source": "src_zone",
+        "target": "src_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.zone' (The network zone or LAN segment.)"
+      },
+      {
+        "source": "dst_zone",
+        "target": "dst_endpoint.zone",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.zone' (The network zone or LAN segment.)"
+      },
+      {
+        "source": "src_ip",
+        "target": "src_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "dst_ip",
+        "target": "dst_endpoint.ip",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.ip' (The IP address of the endpoint, in either IPv4 or IPv6 forma)"
+      },
+      {
+        "source": "src_port",
+        "target": "src_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'src_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "dst_port",
+        "target": "dst_endpoint.port",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'dst_endpoint.port' (The port used for communication within the network connectio)"
+      },
+      {
+        "source": "connection_protocol",
+        "target": "connection_info.protocol_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'connection_info.protocol_name' (The IP protocol name in lowercase, as defined by the Interne)"
+      },
+      {
+        "source": "action",
+        "target": "action",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'action' (The normalized caption of action_id .)"
+      },
+      {
+        "source": "app",
+        "target": "app_name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'app_name' (The network application name identified by tools such as NBA)"
+      },
+      {
+        "source": "rule",
+        "target": "firewall_rule.name",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'firewall_rule.name' (The name of the rule that generated the event.)"
+      },
+      {
+        "source": "bytes_sent",
+        "target": "traffic.bytes",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "bytes_received",
+        "target": "cumulative_traffic.bytes",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'cumulative_traffic.bytes' (The total number of bytes transferred in both directions (su)"
+      },
+      {
+        "source": "packets_sent",
+        "target": "traffic.packets",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'traffic.packets' (The total number of packets transferred in both directions ()"
+      },
+      {
+        "source": "packets_received",
+        "target": "cumulative_traffic.packets",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'cumulative_traffic.packets' (The total number of packets transferred in both directions ()"
+      },
+      {
+        "source": "session_key",
+        "target": "actor.session",
+        "transform": "direct",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'actor.session' (The user session from which the activity was initiated.)"
+      },
+      {
+        "source": "start_time",
+        "target": "start_time",
+        "transform": "cast",
+        "expression": null,
+        "confidence": 0.95,
+        "rationale": "Token overlap with 'start_time' (The time of the earliest event in an aggregate ( count > 1).)"
+      },
+      {
+        "source": "",
+        "target": "class_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF class UID)"
+      },
+      {
+        "source": "",
+        "target": "metadata.product",
+        "transform": "constant",
+        "expression": "'unknown'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (set the logging product name)"
+      },
+      {
+        "source": "",
+        "target": "metadata.version",
+        "transform": "constant",
+        "expression": "'1.9.0'",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF version)"
+      },
+      {
+        "source": "",
+        "target": "category_uid",
+        "transform": "constant",
+        "expression": "4",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (OCSF category UID)"
+      },
+      {
+        "source": "",
+        "target": "type_uid",
+        "transform": "constant",
+        "expression": "4001",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval (class UID; refine per activity if known)"
+      },
+      {
+        "source": "",
+        "target": "activity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "severity_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.type_id",
+        "transform": "constant",
+        "expression": "0",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "osint.value",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      },
+      {
+        "source": "",
+        "target": "cloud.provider",
+        "transform": "constant",
+        "expression": "''",
+        "confidence": 0.3,
+        "rationale": "Auto-fill default - review before approval"
+      }
+    ],
+    "approved_by": "data-owner",
+    "notes": "",
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "coverage": 1.0,
+      "breadth": 0.043,
+      "required_total": 11,
+      "mapped_targets": [
+        "action",
+        "activity_id",
+        "actor.session",
+        "app_name",
+        "category_uid",
+        "class_uid",
+        "cloud.provider",
+        "connection_info.protocol_name",
+        "cumulative_traffic.bytes",
+        "cumulative_traffic.packets",
+        "dst_endpoint.ip",
+        "dst_endpoint.port",
+        "dst_endpoint.zone",
+        "firewall_rule.name",
+        "metadata.product",
+        "metadata.version",
+        "osint.type_id",
+        "osint.value",
+        "severity_id",
+        "src_endpoint.ip",
+        "src_endpoint.port",
+        "src_endpoint.zone",
+        "start_time",
+        "time",
+        "traffic.bytes",
+        "traffic.packets",
         "type_uid"
       ]
     },

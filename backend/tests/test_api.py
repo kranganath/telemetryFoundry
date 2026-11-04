@@ -367,6 +367,107 @@ def test_chat_json_strips_fences(monkeypatch):
     assert llm.chat_json("s", "u") == {"a": 1}
 
 
+def _enable_llm(monkeypatch):
+    monkeypatch.setenv("META_API_BASE_URL", "https://x.test/v1")
+    monkeypatch.setenv("META_API_KEY", "k")
+    monkeypatch.setenv("META_MODEL", "m")
+
+
+def test_chat_timeout_fails_fast_without_retry(monkeypatch):
+    import httpx
+    import app.llm as llm
+
+    _enable_llm(monkeypatch)
+    calls = []
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, *a, **k):
+            calls.append(1)
+            raise httpx.ReadTimeout("slow")
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+    assert llm.chat([{"role": "user", "content": "hi"}], json_mode=True) is None
+    assert len(calls) == 1
+    assert "no response after 60s" in (llm.last_error() or "")
+    assert "META_TIMEOUT_SECONDS" in (llm.last_error() or "")
+
+
+def test_chat_connect_timeout_message(monkeypatch):
+    import httpx
+    import app.llm as llm
+
+    _enable_llm(monkeypatch)
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, *a, **k):
+            raise httpx.ConnectTimeout("unreachable")
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+    assert llm.chat([{"role": "user", "content": "hi"}]) is None
+    assert "connection timed out after 10s" in (llm.last_error() or "")
+
+
+def test_chat_retries_format_rejection(monkeypatch):
+    import httpx
+    import app.llm as llm
+
+    _enable_llm(monkeypatch)
+    attempts = []
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, url, json=None, headers=None):
+            attempts.append(json or {})
+            req = httpx.Request("POST", url)
+            if "response_format" in (json or {}):
+                raise httpx.HTTPStatusError(
+                    "bad", request=req,
+                    response=httpx.Response(400, request=req))
+            return httpx.Response(
+                200, request=req,
+                json={"choices": [{"message": {"content": "ok"}}]})
+
+    monkeypatch.setattr(httpx, "Client", FakeClient)
+    assert llm.chat([{"role": "user", "content": "hi"}], json_mode=True) == "ok"
+    assert len(attempts) == 2
+    assert "response_format" not in attempts[1]
+
+
+def test_chat_timeout_env(monkeypatch):
+    from app import llm
+
+    monkeypatch.setenv("META_TIMEOUT_SECONDS", "12")
+    assert llm._timeout_seconds() == 12.0
+    monkeypatch.setenv("META_TIMEOUT_SECONDS", "junk")
+    assert llm._timeout_seconds() == 60.0
+
+
 def test_hydrate_unknown_standard_404():
     r = client.post("/api/standards/hydrate", json={"standard_id": "nope"})
     assert r.status_code == 404
